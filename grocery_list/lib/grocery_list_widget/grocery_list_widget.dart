@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_list/blocs/grocery_list_bloc.dart';
 import 'package:grocery_list/grocery_list_widget/grocery_list_item.dart';
+import 'package:grocery_list/models/item.dart';
 
 class GroceryListApp extends StatelessWidget {
   const GroceryListApp({super.key});
@@ -16,7 +17,7 @@ class GroceryListApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 85, 93, 107)),
           useMaterial3: true,
         ),
-        home: const GroceryListHomePage(title: 'Grocery List Home Page'),
+        home: const GroceryListHomePage(title: 'Grocery List'),
       ),
     );
   }
@@ -37,15 +38,12 @@ class _GroceryListState extends State<GroceryListHomePage> {
     return ListView.builder(
       itemCount: items.length,
       itemBuilder: (context, index) {
-        final item = items[index];
-        return GroceryListItem(
-          item: item,
-        );
+        return (items[index]);
       },
     );
   }
 
-  Future<void> _displayAddItemDialog() async {
+  Future<void> _displayAddGroceryListItemDialog() async {
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -61,12 +59,16 @@ class _GroceryListState extends State<GroceryListHomePage> {
               child: const Text('Add'),
               onPressed: () {
                 if (_textFieldController.text.isNotEmpty){
+                  // Create new Grocery List Item and emit to BLoC handler
                   Navigator.of(context).pop();
+                  Item newItem = Item(itemText: _textFieldController.text);
+                  GroceryListItem newGroceryListItem = GroceryListItem(item: newItem);
                   context.read<GroceryListBloc>().add(
-                    AddItem(itemText: _textFieldController.text)
+                    AddGroceryListItem(groceryListItem: newGroceryListItem)
                   );
                   _textFieldController.clear();
                 } else {
+                  // Display error for empty text field
                   showDialog(
                     context: context,
                     builder: (BuildContext context) => const AlertDialog(
@@ -89,8 +91,8 @@ class _GroceryListState extends State<GroceryListHomePage> {
       ),
       body: BlocBuilder<GroceryListBloc, GroceryListState> (
           builder: (context, state) {
-            if (state is GroceryListUpdated && state.items.isNotEmpty) {
-              return buildGroceryListItemsWidget(state.items);
+            if (state is GroceryListUpdated && state.groceryListItems.isNotEmpty) {
+              return buildGroceryListItemsWidget(state.groceryListItems);
             } else {
               return const SizedBox(
                 width: double.infinity,
@@ -100,7 +102,7 @@ class _GroceryListState extends State<GroceryListHomePage> {
           },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _displayAddItemDialog(),
+        onPressed: () => _displayAddGroceryListItemDialog(),
         tooltip: 'Add item',
         child: const Icon(Icons.add),
       ),

@@ -3,8 +3,20 @@ part of 'grocery_list_bloc.dart';
 @immutable
 sealed class GroceryListEvent {}
 
-class AddItem extends GroceryListEvent {
-  final String itemText;
+class AddGroceryListItem extends GroceryListEvent {
+  final GroceryListItem groceryListItem;
 
-  AddItem({required this.itemText});
+  AddGroceryListItem({required this.groceryListItem});
+}
+
+class DeleteGroceryListItem extends GroceryListEvent {
+  final GroceryListItem groceryListItem;
+
+  DeleteGroceryListItem({required this.groceryListItem});
+}
+
+class UpdateGroceryListItem extends GroceryListEvent {
+  final GroceryListItem groceryListItem;
+
+  UpdateGroceryListItem({required this.groceryListItem});
 }
