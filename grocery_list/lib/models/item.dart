@@ -4,5 +4,5 @@ class Item {
     required this.itemText,
   });
 
-  final String itemText;
+  String itemText;
 }

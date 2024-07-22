@@ -34,6 +34,7 @@ class GroceryListHomePage extends StatefulWidget {
 class _GroceryListState extends State<GroceryListHomePage> {
   final TextEditingController _textFieldController = TextEditingController();
 
+  // Assemble all Grocery List Items into a List widget
   ListView buildGroceryListItemsWidget(items) {
     return ListView.builder(
       itemCount: items.length,
@@ -43,10 +44,11 @@ class _GroceryListState extends State<GroceryListHomePage> {
     );
   }
 
+  // Display dialog box for adding new Grocery List Item
   Future<void> _displayAddGroceryListItemDialog() async {
     return showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add a new item'),
@@ -62,7 +64,10 @@ class _GroceryListState extends State<GroceryListHomePage> {
                   // Create new Grocery List Item and emit to BLoC handler
                   Navigator.of(context).pop();
                   Item newItem = Item(itemText: _textFieldController.text);
-                  GroceryListItem newGroceryListItem = GroceryListItem(item: newItem);
+                  GroceryListItem newGroceryListItem = GroceryListItem(
+                    key: UniqueKey(),
+                    item: newItem,
+                  );
                   context.read<GroceryListBloc>().add(
                     AddGroceryListItem(groceryListItem: newGroceryListItem)
                   );
