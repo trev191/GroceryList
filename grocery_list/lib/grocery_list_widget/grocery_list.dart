@@ -24,15 +24,51 @@ class GroceryListHomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _GroceryListState();
 }
 
+// Basic class for single grocery list item
+class Item {
+  Item({
+    required this.itemText,
+  });
+
+  final String itemText;
+}
+
+// Contains Widget builder for single grocery list item
+class GroceryListItem extends StatelessWidget {
+  const GroceryListItem({
+    super.key,
+    required this.item,
+  });
+
+  final Item item;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(item.itemText)
+    );
+  }
+}
+
 class _GroceryListState extends State<GroceryListHomePage> {
   final TextEditingController _textFieldController = TextEditingController();
-  final List<String> _items = <String>[];
+  final List<Item> _items = <Item>[];
 
-  void _addItem(String item) {
+  void _addItem(String itemText) {
     setState(() {
-      _items.add(item);
+      _items.add(Item(itemText: itemText));
     });
     _textFieldController.clear();
+  }
+
+  List<GroceryListItem> buildGroceryListItemsWidget() {
+    return (
+      _items.map((Item item) {
+        return GroceryListItem(
+          item: item,
+        );
+      }).toList()
+    );
   }
 
   Future<void> _displayAddItemDialog() async {
@@ -50,8 +86,16 @@ class _GroceryListState extends State<GroceryListHomePage> {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
-                Navigator.of(context).pop();
-                _addItem(_textFieldController.text);
+                if (_textFieldController.text != ''){
+                  Navigator.of(context).pop();
+                  _addItem(_textFieldController.text);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => const AlertDialog(
+                      content: Text('Field must not be empty'),
+                    ));
+                }
               },
             ),
           ],
@@ -68,11 +112,7 @@ class _GroceryListState extends State<GroceryListHomePage> {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: _items.map((String item) {
-          return Text(
-            item
-          );
-        }).toList(),
+        children: buildGroceryListItemsWidget(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayAddItemDialog(),
