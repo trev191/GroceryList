@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_list/blocs/grocery_list_bloc.dart';
+import 'package:grocery_list/grocery_list_widget/grocery_list_item.dart';
 
 class GroceryListApp extends StatelessWidget {
   const GroceryListApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Grocery List',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 85, 93, 107)),
-        useMaterial3: true,
+    return BlocProvider(
+      create: (context) => GroceryListBloc(),
+      child: MaterialApp(
+        title: 'Grocery List',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 85, 93, 107)),
+          useMaterial3: true,
+        ),
+        home: const GroceryListHomePage(title: 'Grocery List Home Page'),
       ),
-      home: const GroceryListHomePage(title: 'Grocery List Home Page'),
     );
   }
 }
@@ -24,50 +30,18 @@ class GroceryListHomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _GroceryListState();
 }
 
-// Basic class for single grocery list item
-class Item {
-  Item({
-    required this.itemText,
-  });
-
-  final String itemText;
-}
-
-// Contains Widget builder for single grocery list item
-class GroceryListItem extends StatelessWidget {
-  const GroceryListItem({
-    super.key,
-    required this.item,
-  });
-
-  final Item item;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(item.itemText)
-    );
-  }
-}
-
 class _GroceryListState extends State<GroceryListHomePage> {
   final TextEditingController _textFieldController = TextEditingController();
-  final List<Item> _items = <Item>[];
 
-  void _addItem(String itemText) {
-    setState(() {
-      _items.add(Item(itemText: itemText));
-    });
-    _textFieldController.clear();
-  }
-
-  List<GroceryListItem> buildGroceryListItemsWidget() {
-    return (
-      _items.map((Item item) {
+  ListView buildGroceryListItemsWidget(items) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
         return GroceryListItem(
           item: item,
         );
-      }).toList()
+      },
     );
   }
 
@@ -86,9 +60,12 @@ class _GroceryListState extends State<GroceryListHomePage> {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
-                if (_textFieldController.text != ''){
+                if (_textFieldController.text.isNotEmpty){
                   Navigator.of(context).pop();
-                  _addItem(_textFieldController.text);
+                  context.read<GroceryListBloc>().add(
+                    AddItem(itemText: _textFieldController.text)
+                  );
+                  _textFieldController.clear();
                 } else {
                   showDialog(
                     context: context,
@@ -110,9 +87,17 @@ class _GroceryListState extends State<GroceryListHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: buildGroceryListItemsWidget(),
+      body: BlocBuilder<GroceryListBloc, GroceryListState> (
+          builder: (context, state) {
+            if (state is GroceryListUpdated && state.items.isNotEmpty) {
+              return buildGroceryListItemsWidget(state.items);
+            } else {
+              return const SizedBox(
+                width: double.infinity,
+                child: Center(child: Text('No current items')),
+              );
+            }
+          },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _displayAddItemDialog(),
