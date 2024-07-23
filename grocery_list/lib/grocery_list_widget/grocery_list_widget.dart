@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_list/blocs/grocery_list_bloc.dart';
 import 'package:grocery_list/grocery_list_widget/grocery_list_item.dart';
 import 'package:grocery_list/models/item.dart';
+import 'package:grocery_list/grocery_list_widget/error_dialog.dart';
 
 class GroceryListApp extends StatelessWidget {
   const GroceryListApp({super.key});
@@ -32,7 +33,7 @@ class GroceryListHomePage extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryListHomePage> {
-  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _addItemTextFieldController = TextEditingController();
 
   // Assemble all Grocery List Items into a List widget
   ListView buildGroceryListItemsWidget(items) {
@@ -48,37 +49,31 @@ class _GroceryListState extends State<GroceryListHomePage> {
   Future<void> _displayAddGroceryListItemDialog() async {
     return showDialog(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add a new item'),
           content: TextField(
-            controller: _textFieldController,
+            controller: _addItemTextFieldController,
             decoration: const InputDecoration(hintText: 'Type new item'),
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('Add'),
               onPressed: () {
-                if (_textFieldController.text.isNotEmpty){
+                if (_addItemTextFieldController.text.isNotEmpty){
                   // Create new Grocery List Item and emit to BLoC handler
                   Navigator.of(context).pop();
-                  Item newItem = Item(itemText: _textFieldController.text);
                   GroceryListItem newGroceryListItem = GroceryListItem(
                     key: UniqueKey(),
-                    item: newItem,
+                    item: Item(itemText: _addItemTextFieldController.text),
                   );
                   context.read<GroceryListBloc>().add(
                     AddGroceryListItem(groceryListItem: newGroceryListItem)
                   );
-                  _textFieldController.clear();
+                  _addItemTextFieldController.clear();
                 } else {
-                  // Display error for empty text field
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => const AlertDialog(
-                      content: Text('Field must not be empty'),
-                    ));
+                  // Handle empty text field
+                  displayEmptyFieldError(context);
                 }
               },
             ),

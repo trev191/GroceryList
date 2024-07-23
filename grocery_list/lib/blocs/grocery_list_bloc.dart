@@ -29,10 +29,6 @@ class GroceryListBloc extends Bloc<GroceryListEvent, GroceryListState> {
     for (int i = 0; i < state.groceryListItems.length; i++) {
       if (state.groceryListItems[i].key == event.groceryListItem.key) {
         state.groceryListItems[i] = event.groceryListItem;
-        print('UPDATED\n');
-        print('UPDATED\n');
-        print('UPDATED\n');
-        print('UPDATED\n');
         emit(GroceryListUpdated(groceryListItems: state.groceryListItems));
         return;
       }
