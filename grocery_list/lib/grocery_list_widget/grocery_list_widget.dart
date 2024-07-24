@@ -84,6 +84,11 @@ class _GroceryListState extends State<GroceryListHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Create grocery list initialization event to grab data from disk
+    context.read<GroceryListBloc>().add(
+      InitGroceryListItems()
+    );
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -91,9 +96,12 @@ class _GroceryListState extends State<GroceryListHomePage> {
       ),
       body: BlocBuilder<GroceryListBloc, GroceryListState> (
           builder: (context, state) {
-            if (state is GroceryListUpdated && state.groceryListItems.isNotEmpty) {
+            // Display grocery list items upon state update and non-empty state
+            if (((state is GroceryListInitial) || (state is GroceryListUpdated))
+                 && state.groceryListItems.isNotEmpty) {
               return buildGroceryListItemsWidget(state.groceryListItems);
             } else {
+              // Display message stating empty list
               return const SizedBox(
                 width: double.infinity,
                 child: Center(child: Text('No current items')),

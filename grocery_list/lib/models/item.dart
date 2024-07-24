@@ -5,4 +5,11 @@ class Item {
   });
 
   String itemText;
+
+  // Convert object to JSON-encodable map
+  Map<String, dynamic> toJson() {
+    return {
+      'itemText': itemText,
+    };
+  }
 }

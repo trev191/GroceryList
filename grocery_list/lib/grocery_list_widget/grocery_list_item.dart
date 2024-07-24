@@ -16,6 +16,22 @@ class GroceryListItem extends StatelessWidget {
   final TextEditingController _editItemTextFieldController =
                                     TextEditingController();
 
+  // Convert object to JSON-encodable map
+  Map<String, dynamic> toJson() {
+    return {
+      'key': key.toString(),
+      'item': item.toJson(),
+    };
+  }
+
+  // Create object from JSON map
+  factory GroceryListItem.fromJson(Map<String, dynamic> json) {
+    return GroceryListItem(
+      key: Key(json['key']),
+      item: Item(itemText: json['item']['itemText']),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
